@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "319230287",
+    "project_id": "smartalert-2c301",
+    "storage_bucket": "smartalert-2c301.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319230287:android:92cd6fca1e857c1810b53a",
+        "android_client_info": {
+          "package_name": "com.example.smartalert"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "319230287-icsrvg1a3gjtljga8f15p4jc02i69dvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk_GuYvMGuNFJ8gq81Mhwd8xuBKftT3u0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "319230287-icsrvg1a3gjtljga8f15p4jc02i69dvh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
