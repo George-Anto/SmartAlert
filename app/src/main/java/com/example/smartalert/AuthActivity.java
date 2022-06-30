@@ -3,6 +3,7 @@ package com.example.smartalert;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -20,6 +21,7 @@ import java.util.Objects;
 public class AuthActivity extends AppCompatActivity {
     EditText emailText, passwordText;
     FirebaseAuth auth;
+    String userType = "user";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +44,8 @@ public class AuthActivity extends AppCompatActivity {
                     addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             //Save the user's id
-                            //userAuthenticated(auth.getUid());
-                            showMessage("Current User", auth.getCurrentUser().getDisplayName().toString());
+                            userAuthenticated(auth.getUid(), auth.getCurrentUser().getDisplayName());
+                           // showMessage("Current User", auth.getCurrentUser().getDisplayName());
                         } else {
                             try {
                                 //Show the error message so the user can understand what went wrong
@@ -67,11 +69,11 @@ public class AuthActivity extends AppCompatActivity {
                     //Save the user's id
                     //userAuthenticated(auth.getUid());
                     UserProfileChangeRequest userRole = new UserProfileChangeRequest.Builder()
-                            .setDisplayName("user")
+                            .setDisplayName(userType)
                             .build();
-                    FirebaseUser user = task.getResult().getUser();
-                    user.updateProfile(userRole);
-                    Toast.makeText(this, "You did it!", Toast.LENGTH_LONG).show();
+                    task.getResult().getUser().updateProfile(userRole);
+//                    showMessage("You did it", "Good job");
+                    userAuthenticated(auth.getUid(), userType);
                 } else {
                     try {
                         //Show the error message so the user can understand what went wrong
@@ -103,5 +105,15 @@ public class AuthActivity extends AppCompatActivity {
                 .setTitle(title)
                 .setMessage(message)
                 .show();
+    }
+
+    //Successful authentication helper method
+    //Redirect the user to the main menu activity
+    private void userAuthenticated(String uid, String role) {
+        if (role.equals("user"))
+            //Send the user's id to the next activity as well
+            startActivity(new Intent(this, UserMenuActivity.class).putExtra("Uid", uid).putExtra("Role", role));
+        else if (role.equals("admin"))
+            startActivity(new Intent(this, AdminMenuActivity.class).putExtra("Uid", uid).putExtra("Role", role));
     }
 }
