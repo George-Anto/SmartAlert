@@ -9,11 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.Objects;
@@ -21,6 +17,8 @@ import java.util.Objects;
 public class AuthActivity extends AppCompatActivity {
     EditText emailText, passwordText;
     FirebaseAuth auth;
+    //We define here that all the users that can sign up to our app will have the user role
+    //An admin user have already been created manually
     String userType = "user";
 
     @Override
@@ -43,9 +41,8 @@ public class AuthActivity extends AppCompatActivity {
             auth.signInWithEmailAndPassword(email, password).
                     addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            //Save the user's id
-                            userAuthenticated(auth.getUid(), auth.getCurrentUser().getDisplayName());
-                           // showMessage("Current User", auth.getCurrentUser().getDisplayName());
+                            //Save the user's id and their role and pass them to the next activity
+                            userAuthenticated(auth.getUid(), Objects.requireNonNull(Objects.requireNonNull(auth.getCurrentUser()).getDisplayName()));
                         } else {
                             try {
                                 //Show the error message so the user can understand what went wrong
@@ -55,6 +52,7 @@ public class AuthActivity extends AppCompatActivity {
                             }
                         }
                     });
+            //If the email or password is empty, show corresponding message
         } else
             errorToast(email, password);
     }
@@ -66,13 +64,14 @@ public class AuthActivity extends AppCompatActivity {
         if (!(email.matches("") || password.matches(""))) {
             auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    //Save the user's id
-                    //userAuthenticated(auth.getUid());
+                    //Save an additional info to the user that signed up successfully
+                    //We also save the role of the user, we have defined that all the users that can
+                    //enroll have the user role
                     UserProfileChangeRequest userRole = new UserProfileChangeRequest.Builder()
                             .setDisplayName(userType)
                             .build();
-                    task.getResult().getUser().updateProfile(userRole);
-//                    showMessage("You did it", "Good job");
+                    Objects.requireNonNull(task.getResult().getUser()).updateProfile(userRole);
+                    //Send the user's id and user type to the next activity
                     userAuthenticated(auth.getUid(), userType);
                 } else {
                     try {
@@ -108,12 +107,17 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     //Successful authentication helper method
-    //Redirect the user to the main menu activity
+    //Redirect the user to the next activity depending on their role
     private void userAuthenticated(String uid, String role) {
+        //If the user is a simple user, we redirect them to the UserMenuActivity and send there their id and role too
         if (role.equals("user"))
-            //Send the user's id to the next activity as well
-            startActivity(new Intent(this, UserMenuActivity.class).putExtra("Uid", uid).putExtra("Role", role));
+            startActivity(new Intent(this, UserMenuActivity.class)
+                    .putExtra("Uid", uid)
+                    .putExtra("Role", role));
+        //If the user is an admin, we redirect them to the AdminMenuActivity and send there their id and role too
         else if (role.equals("admin"))
-            startActivity(new Intent(this, AdminMenuActivity.class).putExtra("Uid", uid).putExtra("Role", role));
+            startActivity(new Intent(this, AdminMenuActivity.class)
+                    .putExtra("Uid", uid)
+                    .putExtra("Role", role));
     }
 }
