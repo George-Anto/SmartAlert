@@ -170,7 +170,9 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
             e.printStackTrace();
         }
         //Write the new user to our database
-        writeUserToDB(auth.getUid(), userType);
+        //If their role is user, we do not insert admins to the users table in the firebase
+        if (userType.equals("user"))
+            writeUserToDB(auth.getUid(), userType);
         //After we retrieve the user's location once, we stop getting any more location data from the user
         manager.removeUpdates(this);
     }

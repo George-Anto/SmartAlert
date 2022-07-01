@@ -4,11 +4,12 @@ import androidx.annotation.NonNull;
 
 public class User {
 
-    private final String uid;
-    private final String role;
+    private String uid;
+    private String role;
     private double latitude;
     private double longitude;
     private String locationAddress;
+    private long phoneNumber;
 
     public User(String uid, String role, double latitude, double longitude, String locationAddress) {
         this.uid = uid;
@@ -16,7 +17,10 @@ public class User {
         this.latitude = latitude;
         this.longitude = longitude;
         setLocationAddress(locationAddress);
+        phoneNumber = 0;
     }
+
+    public User() {}
 
     public String getUid() {
         return uid;
@@ -38,12 +42,20 @@ public class User {
         return locationAddress;
     }
 
+    public long getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public void setPhoneNumber(long phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public void setLocationAddress(String locationAddress) {
@@ -60,9 +72,10 @@ public class User {
         return "User{" +
                 "uid='" + uid + '\'' +
                 ", role='" + role + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 ", locationAddress='" + locationAddress + '\'' +
+                ", phoneNumber=" + phoneNumber +
                 '}';
     }
 }
