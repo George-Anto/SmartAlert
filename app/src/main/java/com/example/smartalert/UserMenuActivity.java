@@ -3,8 +3,17 @@ package com.example.smartalert;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,10 +26,19 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.Console;
+import java.util.List;
+import java.util.Locale;
 
-public class UserMenuActivity extends AppCompatActivity {
+public class UserMenuActivity extends AppCompatActivity implements LocationListener {
     private String uid;
     private String role;
+
+    private double latitude;
+    private double longitude;
+    private String locationAddress;
+
+    //The location manager to get user's location
+    private LocationManager manager;
 
     private EditText phoneNumberView;
 
@@ -63,7 +81,7 @@ public class UserMenuActivity extends AppCompatActivity {
                     if (currentUser.getPhoneNumber() != 0)
                         phoneNumberView.setText(String.valueOf(currentUser.getPhoneNumber()));
                 } catch (Exception e) {
-                    System.out.println(e);
+                    e.printStackTrace();
                 }
             }
 
@@ -100,9 +118,59 @@ public class UserMenuActivity extends AppCompatActivity {
             return;
         }
         usersTable.child(userUpdateRef).child("phoneNumber").setValue(newPhoneNumber);
+        showMessage("Phone Number Updated", String.valueOf(newPhoneNumber));
     }
 
     public void onSendCurrentLocation(View view) {
+        //Ask for the user's permission to use their location if we do not currently have it or
+        //Use the manger to retrieve the user's location
+        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},123);
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                //We used some limits for the location updates, so that the updates will not arrive very fast
+                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+            }
+        } else {
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        }
 
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        //Get the user's current coordinates
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        //Get the address of the user based on the coordinates we retrieved
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            //Get the first address of the produced list with possible addresses
+            Address firstAddress = addresses.get(0);
+            locationAddress = firstAddress.getAddressLine(0);
+        } catch (Exception e) {
+            Log.d("Error", e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        updateUsersLocationInfo();
+        //After we retrieve the user's location once, we stop getting any more location data from the user
+        manager.removeUpdates(this);
+    }
+
+    private void updateUsersLocationInfo() {
+        if (latitude == 0 || longitude == 0) {
+            Toast.makeText(this, "Please enable GPS to update your location.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        usersTable.child(userUpdateRef).child("latitude").setValue(latitude);
+        usersTable.child(userUpdateRef).child("longitude").setValue(longitude);
+        if (locationAddress == null)
+            locationAddress = "Unknown Address";
+        usersTable.child(userUpdateRef).child("locationAddress").setValue(locationAddress);
+        showMessage("Location Updated", locationAddress);
     }
 }
