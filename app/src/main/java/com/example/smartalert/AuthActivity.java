@@ -1,25 +1,46 @@
 package com.example.smartalert;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
-public class AuthActivity extends AppCompatActivity {
+public class AuthActivity extends AppCompatActivity implements LocationListener {
     EditText emailText, passwordText;
     FirebaseAuth auth;
     //We define here that all the users that can sign up to our app will have the user role
     //An admin user have already been created manually
     String userType = "user";
+    private DatabaseReference usersTable;
+    //The location manager to get user's location
+    private LocationManager manager;
+
+    private double latitude;
+    private double longitude;
+    private String locationAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +50,11 @@ public class AuthActivity extends AppCompatActivity {
         emailText = findViewById(R.id.authEmail);
         passwordText = findViewById(R.id.authPassword);
         auth = FirebaseAuth.getInstance();
+
+        //Initialize the db and the reference
+        //Db and reference
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        usersTable = database.getReference("users");
     }
 
     public void onLogin(View view) {
@@ -71,6 +97,11 @@ public class AuthActivity extends AppCompatActivity {
                             .setDisplayName(userType)
                             .build();
                     Objects.requireNonNull(task.getResult().getUser()).updateProfile(userRole);
+
+                    //Get the new user's location and then create an entry for them in our database
+                    //The method that creates that new entry is called inside the useGPS() method
+                    useGPS();
+
                     //Send the user's id and user type to the next activity
                     userAuthenticated(auth.getUid(), userType);
                 } else {
@@ -119,5 +150,51 @@ public class AuthActivity extends AppCompatActivity {
             startActivity(new Intent(this, AdminMenuActivity.class)
                     .putExtra("Uid", uid)
                     .putExtra("Role", role));
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        //Get the user's current coordinates
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        //Get the address of the user based on the coordinates we retrieved
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            //Get the first address of the produced list with possible addresses
+            Address firstAddress = addresses.get(0);
+            locationAddress = firstAddress.getAddressLine(0);
+        } catch (Exception e) {
+            Log.d("Error", e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        //Write the new user to our database
+        writeUserToDB(auth.getUid(), userType);
+        //After we retrieve the user's location once, we stop getting any more location data from the user
+        manager.removeUpdates(this);
+    }
+
+    private void useGPS() {
+        //Ask for the user's permission to use their location if we do not currently have it or
+        //Use the manger to retrieve the user's location
+        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},123);
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                //We used some limits for the location updates, so that the updates will not arrive very fast
+                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+            }
+        } else {
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        }
+    }
+
+    //Write a new user to our database
+    public void writeUserToDB(String uid, String role) {
+        User newUser = new User(uid, role, latitude, longitude, locationAddress);
+        usersTable.push().setValue(newUser);
     }
 }
