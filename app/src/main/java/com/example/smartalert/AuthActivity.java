@@ -99,7 +99,7 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
                     Objects.requireNonNull(task.getResult().getUser()).updateProfile(userRole);
 
                     //Get the new user's location and then create an entry for them in our database
-                    //The method that creates that new entry is called inside the useGPS() method
+                    //The method that creates that new entry is called inside the onLocationChanged() method of the listener
                     useGPS();
 
                     //Send the user's id and user type to the next activity

@@ -25,14 +25,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.Console;
 import java.util.List;
 import java.util.Locale;
 
 public class UserMenuActivity extends AppCompatActivity implements LocationListener {
-    private String uid;
-    private String role;
-
+    //Those attributes will be used if the user decides to update their location status on our db
     private double latitude;
     private double longitude;
     private String locationAddress;
@@ -42,10 +39,10 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
 
     private EditText phoneNumberView;
 
+    //The current user's info that are stored in our db
     private User currentUser;
 
-    //Db and db reference
-    private FirebaseDatabase database;
+    //Database Reference
     private DatabaseReference usersTable;
     private String userUpdateRef;
 
@@ -55,28 +52,26 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         setContentView(R.layout.activity_user_menu);
 
         //Retrieve user's id and role
-        uid = getIntent().getStringExtra("Uid");
-        role = getIntent().getStringExtra("Role");
+        String uid = getIntent().getStringExtra("Uid");
 
         phoneNumberView = findViewById(R.id.usersPhoneNumberTextView);
 
         //Initialize db and reference
-        database = FirebaseDatabase.getInstance();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
         usersTable = database.getReference("users");
 
+        //Get the current user from the database and store them in the currentUser instance
         Query query = usersTable.orderByChild("uid").equalTo(uid);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Iterable<DataSnapshot> children = snapshot.getChildren();
                 children.forEach(child -> {
-//                    System.out.println("-------------------");
-//                    System.out.println(child.getKey());
-//                    System.out.println("-------------------");
                     userUpdateRef = child.getKey();
                     currentUser = child.getValue(User.class);
                 });
-//                showMessage(uid, currentUser.toString());
+                //If the user has not sent their phone number yet, the variable will be 0
+                //and if this is the case, no value will be presented to the user
                 try {
                     if (currentUser.getPhoneNumber() != 0)
                         phoneNumberView.setText(String.valueOf(currentUser.getPhoneNumber()));
@@ -105,25 +100,30 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
 
     }
 
+    //Get the phone number input from the user and store it in their entry in our db
     public void onSendPhone(View view) {
-        long newPhoneNumber = -1;
+        long newPhoneNumber;
+        //If the user has entered letters in the input field as well
+        //a toast will inform them so
         try {
             newPhoneNumber = Long.parseLong(phoneNumberView.getText().toString());
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Not a Valid Number!", Toast.LENGTH_LONG).show();
             return;
         }
+        //If the number that the user has entered does not meet our criteria, we inform them so
         if (newPhoneNumber < 6900000000L || newPhoneNumber >= 7000000000L) {
             Toast.makeText(this, "Not a Valid Phone Number!", Toast.LENGTH_LONG).show();
             return;
         }
+        //If the input is valid, it will be sent to the db and a success message will be shown
         usersTable.child(userUpdateRef).child("phoneNumber").setValue(newPhoneNumber);
         showMessage("Phone Number Updated", String.valueOf(newPhoneNumber));
     }
 
     public void onSendCurrentLocation(View view) {
         //Ask for the user's permission to use their location if we do not currently have it or
-        //Use the manger to retrieve the user's location
+        //Use the manager to retrieve the user's location
         manager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -156,21 +156,26 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
             Log.d("Error", e.getLocalizedMessage());
             e.printStackTrace();
         }
+        //Save the updates to the database
         updateUsersLocationInfo();
         //After we retrieve the user's location once, we stop getting any more location data from the user
         manager.removeUpdates(this);
     }
 
     private void updateUsersLocationInfo() {
+        //If the GPS has not retrieved coordinates from the device, alert the user to give the corresponding permissions
         if (latitude == 0 || longitude == 0) {
             Toast.makeText(this, "Please enable GPS to update your location.", Toast.LENGTH_LONG).show();
             return;
         }
+        //Update the user's coordinates in our database
         usersTable.child(userUpdateRef).child("latitude").setValue(latitude);
         usersTable.child(userUpdateRef).child("longitude").setValue(longitude);
         if (locationAddress == null)
             locationAddress = "Unknown Address";
+        //Update the address as well
         usersTable.child(userUpdateRef).child("locationAddress").setValue(locationAddress);
+        //Show a success message
         showMessage("Location Updated", locationAddress);
     }
 }
