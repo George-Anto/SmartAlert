@@ -43,18 +43,12 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     private double latitude;
     private double longitude;
     private String locationAddress;
-    private String description;
     private String imagePath;
 
     //The location manager to get user's location
     private LocationManager manager;
 
-    //Db and reference
-    private FirebaseDatabase database;
     private DatabaseReference dangerousSituationsTable;
-
-    //File storage for the images that will be uploaded and reference
-    private FirebaseStorage storage;
     private StorageReference storageReference;
 
     private ImageView imageToUploadView;
@@ -62,8 +56,6 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
 
     private EditText descriptionText;
 
-    //Dropdown list with the category options
-    private Spinner spinner;
     //The categories that will be used
     private static final String[] paths = {"Forest Fire", "City Fire", "Flood",
             "Earthquake", "Tornado", "Other"};
@@ -78,7 +70,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         //Initialize the view that the user will use to upload the image
         imageToUploadView = findViewById(R.id.newDangerousSituationImageView);
         //Action for when the user clicks to upload the image
-        imageToUploadView.setOnClickListener(v -> { chooseImage(); });
+        imageToUploadView.setOnClickListener(v -> chooseImage());
 
         descriptionText = findViewById(R.id.newDangerousSituationDescriptionView);
 
@@ -86,7 +78,8 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         useGPS();
 
         //Create the dropdown list with it's options
-        spinner = findViewById(R.id.newDangerousSituationSpinner);
+        //Dropdown list with the category options
+        Spinner spinner = findViewById(R.id.newDangerousSituationSpinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(CreateDangerousSituationActivity.this,
                 android.R.layout.simple_spinner_item, paths);
 
@@ -95,11 +88,13 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         spinner.setOnItemSelectedListener(this);
 
         //Initialize the db and the reference
-        database = FirebaseDatabase.getInstance();
+        //Db and reference
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
         dangerousSituationsTable = database.getReference("dangerous_situations");
 
         //Initialize the file storage and the reference
-        storage = FirebaseStorage.getInstance();
+        //File storage for the images that will be uploaded and reference
+        FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
     }
 
@@ -127,9 +122,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) { }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
@@ -222,7 +215,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
 
     public void onUploadDangerousSituation(View view) {
         //Get the description the user provided
-        description = descriptionText.getText().toString();
+        String description = descriptionText.getText().toString();
         //If the user has not permitted the usage of the GPS to our app,
         //show them the corresponding message and ask for the permission again with the useGPS() method, then return
         if (latitude == 0 || longitude == 0) {
@@ -230,11 +223,15 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
             useGPS();
             return;
         }
+        //Create a DangerousSituation Instance to save to our db if all the necessary data are present
+        //The photo and the description fields are not necessary following the assignment's instructions
+        //so we do not check if the user has entered those info
+        //If the info are not present, a default value will be assigned to those fields through the constructor
         DangerousSituation currentDangerousSituation = new DangerousSituation(uid, latitude, longitude, locationAddress, category, description, imagePath);
-
+        //Write the newly created object to the database
         dangerousSituationsTable.push().setValue(currentDangerousSituation);
-
-        showMessage("Success", "Your Request has been uploaded.");
+        //Show a success message to the user
+        showMessage("Success", "Your Dangerous Situation request has been uploaded.");
     }
 
     //Show message helper method

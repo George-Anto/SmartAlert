@@ -90,7 +90,7 @@ public class DangerousSituation {
     }
 
     public void setDescription(String description) {
-        if (description == null) {
+        if (description == null || description.matches("")) {
             this.description = "No description provided";
             return;
         }
