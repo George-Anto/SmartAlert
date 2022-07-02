@@ -216,6 +216,11 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     public void onUploadDangerousSituation(View view) {
         //Get the description the user provided
         String description = descriptionText.getText().toString();
+        //If the user has not given a description, show them an error message and return from the method
+        if (description.trim().matches("")) {
+            Toast.makeText(this, "Please provide a description of the situation.", Toast.LENGTH_LONG).show();
+            return;
+        }
         //If the user has not permitted the usage of the GPS to our app,
         //show them the corresponding message and ask for the permission again with the useGPS() method, then return
         if (latitude == 0 || longitude == 0) {
@@ -224,14 +229,15 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
             return;
         }
         //Create a DangerousSituation Instance to save to our db if all the necessary data are present
-        //The photo and the description fields are not necessary following the assignment's instructions
-        //so we do not check if the user has entered those info
-        //If the info are not present, a default value will be assigned to those fields through the constructor
+        //The photo is not necessary following the assignment's instructions
+        //so we do not check if the user has entered one
+        //If the photo is not present, a default value will be assigned to that field through the constructor
+        //and no file will be stored in firebase storage
         DangerousSituation currentDangerousSituation = new DangerousSituation(uid, latitude, longitude, locationAddress, category, description, imagePath);
         //Write the newly created object to the database
         dangerousSituationsTable.push().setValue(currentDangerousSituation);
         //Show a success message to the user
-        showMessage("Success", "Your Dangerous Situation request has been uploaded.");
+        showMessage("Success", "The Dangerous Situation Request has been uploaded.");
     }
 
     //Show message helper method

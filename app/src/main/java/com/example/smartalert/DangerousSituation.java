@@ -35,7 +35,7 @@ public class DangerousSituation {
         this.longitude = longitude;
         setLocationAddress(locationAddress);
         this.category = category;
-        setDescription(description);
+        this.description = description;
         setImagePath(imagePath);
     }
 
@@ -87,14 +87,6 @@ public class DangerousSituation {
             return;
         }
         this.locationAddress = locationAddress;
-    }
-
-    public void setDescription(String description) {
-        if (description == null || description.matches("")) {
-            this.description = "No description provided";
-            return;
-        }
-        this.description = description;
     }
 
     public void setImagePath(String imagePath) {
