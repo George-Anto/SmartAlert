@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class UserMenuActivity extends AppCompatActivity implements LocationListener {
+    String uid;
     //Those attributes will be used if the user decides to update their location status on our db
     private double latitude;
     private double longitude;
@@ -52,7 +54,7 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         setContentView(R.layout.activity_user_menu);
 
         //Retrieve user's id and role
-        String uid = getIntent().getStringExtra("Uid");
+        uid = getIntent().getStringExtra("Uid");
 
         phoneNumberView = findViewById(R.id.usersPhoneNumberTextView);
 
@@ -97,7 +99,8 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
     }
 
     public void onCreateNew(View view) {
-
+        startActivity(new Intent(this, CreateDangerousSituationActivity.class)
+                .putExtra("Uid", uid));
     }
 
     //Get the phone number input from the user and store it in their entry in our db
