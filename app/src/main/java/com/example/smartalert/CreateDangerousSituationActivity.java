@@ -48,7 +48,9 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     //The location manager to get user's location
     private LocationManager manager;
 
-    private DatabaseReference dangerousSituationsTable;
+    //The database reference will change according to the category of the situation the user reported
+    //This means that each different category will be stored in a separate table for better management from the backend
+    private DatabaseReference dangerousSituationsTables;
     private StorageReference storageReference;
 
     private ImageView imageToUploadView;
@@ -59,6 +61,10 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     //The categories that will be used
     private static final String[] paths = {"Forest Fire", "City Fire", "Flood",
             "Earthquake", "Tornado", "Other"};
+
+    private static final String[] categoryTableOptions = {"forest_fire", "city_fire", "flood",
+            "earthquake", "tornado", "other"};
+    private String categoryTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +96,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         //Initialize the db and the reference
         //Db and reference
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        dangerousSituationsTable = database.getReference("dangerous_situations");
+        dangerousSituationsTables = database.getReference();
 
         //Initialize the file storage and the reference
         //File storage for the images that will be uploaded and reference
@@ -103,21 +109,27 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         switch (position) {
             case 0:
                 category = paths[0];
+                categoryTable = categoryTableOptions[0];
                 break;
             case 1:
                 category = paths[1];
+                categoryTable = categoryTableOptions[1];
                 break;
             case 2:
                 category = paths[2];
+                categoryTable = categoryTableOptions[2];
                 break;
             case 3:
                 category = paths[3];
+                categoryTable = categoryTableOptions[3];
                 break;
             case 4:
                 category = paths[4];
+                categoryTable = categoryTableOptions[4];
                 break;
             default:
                 category = paths[5];
+                categoryTable = categoryTableOptions[5];
         }
     }
 
@@ -235,9 +247,13 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         //and no file will be stored in firebase storage
         DangerousSituation currentDangerousSituation = new DangerousSituation(uid, latitude, longitude, locationAddress, category, description, imagePath);
         //Write the newly created object to the database
-        dangerousSituationsTable.push().setValue(currentDangerousSituation);
+        //The table that the data will ba stored is different for each category
+        dangerousSituationsTables.child(categoryTable + "_dangerous_situations").push().setValue(currentDangerousSituation);
         //Show a success message to the user
         showMessage("Success", "The Dangerous Situation Request has been uploaded.");
+        //Clear the image and the description views, so the user does not submit the same Request again by accident
+        imageToUploadView.setImageURI(Uri.parse(""));
+        descriptionText.setText("");
     }
 
     //Show message helper method
