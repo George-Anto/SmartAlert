@@ -5,8 +5,11 @@ import androidx.annotation.NonNull;
 public class DangerousSituationsGroup {
 
     private String timestamp;
+    private String date;
+    private String time;
     private double latitude;
     private double longitude;
+    private String locationAddress;
     private String category;
     private int numberOfTimesReported;
     private String alertLevel;
@@ -17,12 +20,24 @@ public class DangerousSituationsGroup {
         return timestamp;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
     public double getLatitude() {
         return latitude;
     }
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public String getLocationAddress() {
+        return locationAddress;
     }
 
     public String getCategory() {
