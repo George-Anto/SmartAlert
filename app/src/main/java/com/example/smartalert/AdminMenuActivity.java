@@ -5,6 +5,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -17,6 +21,8 @@ import java.util.ArrayList;
 public class AdminMenuActivity extends AppCompatActivity {
     private String uid;
     private String role;
+
+    private LinearLayout layout;
 
     private DatabaseReference forestFiresGroupsTable;
     private final ArrayList<DangerousSituationsGroup> forestFiresGroups = new ArrayList<>();
@@ -35,6 +41,8 @@ public class AdminMenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_menu);
+
+        layout = findViewById(R.id.admin_linearLayout_container);
 
         //Retrieve user's id
         uid = getIntent().getStringExtra("Uid");
@@ -66,12 +74,12 @@ public class AdminMenuActivity extends AppCompatActivity {
                 //Get the data and store the in the ArrayList we created
                 Iterable<DataSnapshot> children = snapshot.getChildren();
                 children.forEach(child -> {
-                    DangerousSituationsGroup aForestFireGroup = child.getValue(DangerousSituationsGroup.class);
-                    dangerousSituationGroups.add(aForestFireGroup);
+                    DangerousSituationsGroup aDangerousSituationGroup = child.getValue(DangerousSituationsGroup.class);
+                    dangerousSituationGroups.add(aDangerousSituationGroup);
+                    assert aDangerousSituationGroup != null;
+                    addDangerousSituationCard(aDangerousSituationGroup);
+
                 });
-                System.out.println("--------------------------------");
-                System.out.println(dangerousSituationGroups);
-                System.out.println("--------------------------------");
             }
 
             @Override
@@ -79,6 +87,30 @@ public class AdminMenuActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void addDangerousSituationCard(DangerousSituationsGroup group) {
+        View view = getLayoutInflater().inflate(R.layout.dangerous_situation_card, null);
+
+        TextView groupInfoView = view.findViewById(R.id.adminDangerousSituationGroupTextView);
+
+        StringBuilder builder = new StringBuilder();
+        //For each group, store its data to the StringBuilder we created
+        builder.append(group.getCategory()).append("\n");
+        builder.append("Alert: ").append(group.getAlertLevel()).append("\n");
+        builder.append("Times Reported: ").append(group.getNumberOfTimesReported()).append("\n");
+        builder.append("Latitude: ").append(group.getLatitude()).append("\n");
+        builder.append("Longitude: ").append(group.getLongitude()).append("\n");
+
+        //Set the text to the dangerous situation group view to the contents of the StringBuilder
+        groupInfoView.setText(builder.toString());
+
+        Button sendAlertButton = view.findViewById(R.id.adminSendAlertButton);
+        sendAlertButton.setOnClickListener(v -> {
+            showMessage("Alert", "Users Alerted!!!");
+//            layout.removeView(view);
+        });
+        layout.addView(view);
     }
 
     //Show message helper method
