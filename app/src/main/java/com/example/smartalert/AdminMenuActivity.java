@@ -3,9 +3,14 @@ package com.example.smartalert;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -33,6 +38,10 @@ public class AdminMenuActivity extends AppCompatActivity {
     private final ArrayList<DangerousSituationsGroup> tornadosGroups = new ArrayList<>();
     private final ArrayList<DangerousSituationsGroup> othersGroups = new ArrayList<>();
 
+    private final ArrayList<User> allUsers = new ArrayList<>();
+    ArrayList<String> usersToAlertPhoneNumbers = new ArrayList<>();
+    private DatabaseReference usersTable;
+
     @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +61,9 @@ public class AdminMenuActivity extends AppCompatActivity {
         DatabaseReference earthquakesGroupsTable = database.getReference("earthquakes_groups");
         DatabaseReference tornadosGroupsTable = database.getReference("tornados_groups");
         DatabaseReference othersGroupsTable = database.getReference("other_groups");
+
+        usersTable = database.getReference("users");
+        retrieveAllUsers();
 
         //Call the method that reads the data form the db for each table and corresponding ArrayList
         readDataFromDB(forestFiresGroupsTable, forestFiresGroups);
@@ -118,7 +130,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         Button sendAlertButton = view.findViewById(R.id.adminSendAlertButton);
         //Create the on click listener
         sendAlertButton.setOnClickListener(v -> {
-            showMessage("Alert", "Users Alerted!!!");
+            alertUsers(group);
 //            layout.removeView(view);
         });
         //Insert the view to the layout container of the ui
@@ -153,5 +165,87 @@ public class AdminMenuActivity extends AppCompatActivity {
                 .setTitle(title)
                 .setMessage(message)
                 .show();
+    }
+
+    private void retrieveAllUsers() {
+        usersTable.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Iterable<DataSnapshot> children = snapshot.getChildren();
+                children.forEach(child -> {
+                    User aUser = child.getValue(User.class);
+                    allUsers.add(aUser);
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+    }
+
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        dist = dist * 1.609344;
+
+        return (dist);
+    }
+
+    //This function converts decimal degrees to radians
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    //This function converts radians to decimal degrees
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
+
+    private void alertUsers(DangerousSituationsGroup group) {
+        usersToAlertPhoneNumbers.clear();
+        allUsers.forEach(user -> {
+            double distance = distance(group.getLatitude(), group.getLongitude(),
+                    user.getLatitude(), user.getLongitude());
+            if (distance <= 50 && user.getPhoneNumber() != 0) {
+                usersToAlertPhoneNumbers.add(String.valueOf(user.getPhoneNumber()));
+            }
+        });
+        if (usersToAlertPhoneNumbers.size() == 0) {
+            showMessage("No Users to be Alerted",
+                    "There are no known users near this Dangerous Situation.");
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                == PackageManager.PERMISSION_GRANTED) {
+            sendSMS(usersToAlertPhoneNumbers);
+        } else {
+            //When permission is not granted, we will request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.SEND_SMS}, 100);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //Check condition
+        if (requestCode == 100 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //When permission is granted
+            sendSMS(usersToAlertPhoneNumbers);
+        } else {
+            //When permission is denied
+            showMessage("Permission Denied", "This application is not permitted to send SMSs.");
+        }
+    }
+
+    private void sendSMS(ArrayList<String> phoneNumbers) {
+        SmsManager smsManager = SmsManager.getDefault();
+        String message = "Danger, run away!!!";
+        phoneNumbers.forEach(phoneNumber -> smsManager.sendTextMessage(phoneNumber, null,
+                message, null, null));
+        showMessage("Alert Sent", "An alert SMS has been sent to nearby users.");
     }
 }
