@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -61,6 +63,9 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         //Initialize db and reference
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         usersTable = database.getReference("users");
+
+        //Initialize the location manager
+        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         //Get the current user from the database and store them in the currentUser instance
         Query query = usersTable.orderByChild("uid").equalTo(uid);
@@ -125,21 +130,30 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
     }
 
     public void onSendCurrentLocation(View view) {
-        //Ask for the user's permission to use their location if we do not currently have it or
-        //Use the manager to retrieve the user's location
-        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},123);
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                //We used some limits for the location updates, so that the updates will not arrive very fast
-                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
-            }
-        } else {
+        //Use the manager to retrieve the user's location if permission is already granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        } else {
+            //When permission is not granted, we will request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
         }
+    }
 
+    //When the user answers to the permission request
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //Check condition
+        if (requestCode == 123 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //When permission is granted
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        } else {
+            //When permission is denied
+            showMessage("Permission Denied", "This application is not permitted to get user's location.");
+        }
     }
 
     @Override

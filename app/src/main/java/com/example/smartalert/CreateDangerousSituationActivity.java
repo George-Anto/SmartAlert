@@ -5,8 +5,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -72,6 +74,9 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         setContentView(R.layout.activity_create_dangerous_situation);
 
         uid = getIntent().getStringExtra("Uid");
+
+        //Initialize the location manager
+        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         //Initialize the view that the user will use to upload the image
         imageToUploadView = findViewById(R.id.newDangerousSituationImageView);
@@ -157,20 +162,30 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         manager.removeUpdates(this);
     }
 
-    private void useGPS() {
-        //Ask for the user's permission to use their location if we do not currently have it or
-        //Use the manger to retrieve the user's location
-        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},123);
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                //We used some limits for the location updates, so that the updates will not arrive very fast
-                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
-            }
-        } else {
+    public void useGPS() {
+        //Use the manager to retrieve the user's location if permission is already granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        } else {
+            //When permission is not granted, we will request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+        }
+    }
+
+    //When the user answers to the permission request
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //Check condition
+        if (requestCode == 123 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //When permission is granted
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        } else {
+            //When permission is denied
+            showMessage("Location Permission Denied", "Grand permission to Sign Up.");
         }
     }
 
