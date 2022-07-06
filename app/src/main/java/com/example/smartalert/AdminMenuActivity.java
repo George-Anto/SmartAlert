@@ -38,9 +38,14 @@ public class AdminMenuActivity extends AppCompatActivity {
     private final ArrayList<DangerousSituationsGroup> tornadosGroups = new ArrayList<>();
     private final ArrayList<DangerousSituationsGroup> othersGroups = new ArrayList<>();
 
+    //List that will hold all the users that exist in our database
     private final ArrayList<User> allUsers = new ArrayList<>();
+    //List that will hold all the phone numbers of the users that will be alerted in each case
     ArrayList<String> usersToAlertPhoneNumbers = new ArrayList<>();
+    //Users table reference
     private DatabaseReference usersTable;
+    //Instance that will hold the current dangerous situation group in order to extract info to send the users
+    private DangerousSituationsGroup dangerousSituationsGroupToAlertAbout;
 
     @SuppressLint("InflateParams")
     @Override
@@ -62,6 +67,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         DatabaseReference tornadosGroupsTable = database.getReference("tornados_groups");
         DatabaseReference othersGroupsTable = database.getReference("other_groups");
 
+        //Initialize users table reference and call the method that retrives all the users
         usersTable = database.getReference("users");
         retrieveAllUsers();
 
@@ -130,6 +136,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         Button sendAlertButton = view.findViewById(R.id.adminSendAlertButton);
         //Create the on click listener
         sendAlertButton.setOnClickListener(v -> {
+            //Call the method that alerts the users
             alertUsers(group);
 //            layout.removeView(view);
         });
@@ -167,6 +174,7 @@ public class AdminMenuActivity extends AppCompatActivity {
                 .show();
     }
 
+    //Method that retrieves all the users from our database
     private void retrieveAllUsers() {
         usersTable.addValueEventListener(new ValueEventListener() {
             @Override
@@ -183,6 +191,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         });
     }
 
+    //Method that calculates the distance between 2 coordinates in a sphere like earth
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
@@ -204,20 +213,31 @@ public class AdminMenuActivity extends AppCompatActivity {
         return (rad * 180.0 / Math.PI);
     }
 
+    //Calculate which users will be alerted based on their location
     private void alertUsers(DangerousSituationsGroup group) {
+        //Clear the list
         usersToAlertPhoneNumbers.clear();
+        //Store the current dangerous situation group
+        dangerousSituationsGroupToAlertAbout = group;
+        //For each user in our database
         allUsers.forEach(user -> {
+            //Calculate their distance from the current group
             double distance = distance(group.getLatitude(), group.getLongitude(),
                     user.getLatitude(), user.getLongitude());
+            //If the distance is less that 50 kilometers and the have stored a phone number in our system
+            //Add their number to the list
             if (distance <= 50 && user.getPhoneNumber() != 0) {
                 usersToAlertPhoneNumbers.add(String.valueOf(user.getPhoneNumber()));
             }
         });
+        //If no user found near that location, show a corresponding message
         if (usersToAlertPhoneNumbers.size() == 0) {
             showMessage("No Users to be Alerted",
                     "There are no known users near this Dangerous Situation.");
             return;
         }
+        //If the user (admin) has given permission to our application to end SMSs
+        //Call the corresponding method
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 == PackageManager.PERMISSION_GRANTED) {
             sendSMS(usersToAlertPhoneNumbers);
@@ -228,6 +248,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         }
     }
 
+    //When the user answers to the permission request
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -241,11 +262,28 @@ public class AdminMenuActivity extends AppCompatActivity {
         }
     }
 
+    //Method that sends the SMSs
     private void sendSMS(ArrayList<String> phoneNumbers) {
+        StringBuilder builder = new StringBuilder();
+        //For each SMS group, store its data to the StringBuilder we created
+        builder.append(dangerousSituationsGroupToAlertAbout.getCategory()).append("\n");
+        builder.append("Date: ").append(dangerousSituationsGroupToAlertAbout.getDate()).append("\n");
+        builder.append("Time: ").append(dangerousSituationsGroupToAlertAbout.getTime()).append("\n");
+        //Call the method that sets the location
+        setLocation(dangerousSituationsGroupToAlertAbout, builder);
+        builder.append("Advice from the civil protection: ")
+                .append(dangerousSituationsGroupToAlertAbout.generalInfo()).append("\n");
+        //For debugging purposes
+        System.out.println("-------------------");
+        System.out.println("Send SMS: " + builder);
+        System.out.println("-------------------");
+        //Create the manager that sends the SMSs
         SmsManager smsManager = SmsManager.getDefault();
-        String message = "Danger, run away!!!";
+        //For each phone number in the list, send a message for the dangerous situation group
+        //The message body is depending on the current group specifics and its category
         phoneNumbers.forEach(phoneNumber -> smsManager.sendTextMessage(phoneNumber, null,
-                message, null, null));
+                builder.toString(), null, null));
+        //Show a success message
         showMessage("Alert Sent", "An alert SMS has been sent to nearby users.");
     }
 }
