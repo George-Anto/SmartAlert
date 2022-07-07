@@ -11,7 +11,7 @@
         android:layout_width="337dp"
         android:layout_height="62dp"
         android:background="#FFFEFE"
-        android:text="No dangerous situations are reported yet."
+        android:text="@string/no_dangerous_situations_are_reported_yet"
         android:textSize="22sp"
         android:layout_marginTop="30dp"
         app:layout_constraintBottom_toBottomOf="parent"

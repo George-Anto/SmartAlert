@@ -116,17 +116,17 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         try {
             newPhoneNumber = Long.parseLong(phoneNumberView.getText().toString());
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Not a Valid Number!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.not_valid_number), Toast.LENGTH_LONG).show();
             return;
         }
         //If the number that the user has entered does not meet our criteria, we inform them so
         if (newPhoneNumber < 6900000000L || newPhoneNumber >= 7000000000L) {
-            Toast.makeText(this, "Not a Valid Phone Number!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.not_valid_number), Toast.LENGTH_LONG).show();
             return;
         }
         //If the input is valid, it will be sent to the db and a success message will be shown
         usersTable.child(userUpdateRef).child("phoneNumber").setValue(newPhoneNumber);
-        showMessage("Phone Number Updated", String.valueOf(newPhoneNumber));
+        showMessage(getString(R.string.phone_number_updated), String.valueOf(newPhoneNumber));
     }
 
     public void onSendCurrentLocation(View view) {
@@ -152,7 +152,7 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
         } else {
             //When permission is denied
-            showMessage("Permission Denied", "This application is not permitted to get user's location.");
+            showMessage(getString(R.string.permission_denied), getString(R.string.app_not_permitted_location));
         }
     }
 
@@ -182,7 +182,7 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
     private void updateUsersLocationInfo() {
         //If the GPS has not retrieved coordinates from the device, alert the user to give the corresponding permissions
         if (latitude == 0 || longitude == 0) {
-            Toast.makeText(this, "Please enable GPS to update your location.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.enable_gps), Toast.LENGTH_LONG).show();
             return;
         }
         //Update the user's coordinates in our database
@@ -193,6 +193,6 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         //Update the address as well
         usersTable.child(userUpdateRef).child("locationAddress").setValue(locationAddress);
         //Show a success message
-        showMessage("Location Updated", locationAddress);
+        showMessage(getString(R.string.location_updated), locationAddress);
     }
 }

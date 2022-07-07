@@ -23,7 +23,7 @@
                     android:id="@+id/adminDangerousSituationGroupTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="text"
+                    android:text="@string/test_text"
                     android:textSize="20sp">
 
                 </TextView>
@@ -33,7 +33,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:text="Send Alert">
+                    android:text="@string/send_alert_button">
 
                 </Button>
 

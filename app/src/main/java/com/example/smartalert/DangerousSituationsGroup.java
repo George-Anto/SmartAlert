@@ -68,18 +68,18 @@ public class DangerousSituationsGroup {
 
     public String generalInfo () {
         if (category.matches("Forest Fire"))
-            return "There is a forest fire near yor location, you are advised to leave the forest.";
+            return String.valueOf(R.string.forest_fire_alert);
         else if (category.matches("City Fire"))
-            return "There is a city fire near your location, evacuate the neighborhood to be safe.";
+            return String.valueOf(R.string.city_fire_alert);
         else if (category.matches("Flood"))
-            return "There is a flood near your location, you are advised to get to a high ground to be safe.";
+            return String.valueOf(R.string.flood_alert);
         else if (category.matches("Earthquake"))
-            return "There is an earthquake in progress, evacuate the buildings and go to an open area.";
+            return String.valueOf(R.string.earthquake_alert);
         else if (category.matches("Tornado"))
-            return "There is a tornado near you, get to a protected indoors location for your safety.";
+            return String.valueOf(R.string.tornado_alert);
         else if (category.matches("Other"))
-            return "A dangerous situation is in progress near your location, be cautious.";
+            return String.valueOf(R.string.other_alert);
         else
-            return "A dangerous situation is in progress near your location, be cautious.";
+            return String.valueOf(R.string.other_alert);
     }
 }

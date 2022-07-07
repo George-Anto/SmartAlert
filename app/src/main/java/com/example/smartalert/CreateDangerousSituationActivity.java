@@ -61,8 +61,8 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
     private EditText descriptionText;
 
     //The categories that will be used
-    private static final String[] paths = {"Forest Fire", "City Fire", "Flood",
-            "Earthquake", "Tornado", "Other"};
+    private final String[] paths = {getString(R.string.forest_fire), getString(R.string.city_fire), getString(R.string.flood),
+            getString(R.string.earthquake), getString(R.string.tornado), getString(R.string.other)};
 
     private static final String[] categoryTableOptions = {"forest_fire", "city_fire", "flood",
             "earthquake", "tornado", "other"};
@@ -185,7 +185,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
         } else {
             //When permission is denied
-            showMessage("Location Permission Denied", "Grand permission to Sign Up.");
+            showMessage(getString(R.string.location_permission_denied), getString(R.string.enable_gps_to));
         }
     }
 
@@ -217,7 +217,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
 
         //Create  progress dialog so the user can see the progress
         final ProgressDialog pd = new ProgressDialog(this);
-        pd.setTitle("Processing Image...");
+        pd.setTitle(getString(R.string.process_image));
         pd.show();
 
         //Upload the file (image) to our storage
@@ -228,11 +228,11 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
             //We can then use this token to download and show the current image in our app
             currentImagePath.getDownloadUrl().addOnSuccessListener(uri -> imagePath = uri.toString());
             //Show the completion message to the user
-            Snackbar.make(findViewById(android.R.id.content), "Image Processed", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(findViewById(android.R.id.content), getString(R.string.image_process), Snackbar.LENGTH_LONG).show();
         }).addOnFailureListener(e -> {
             //If there is an error with the process, show corresponding message
             pd.dismiss();
-            Toast.makeText(getApplicationContext(), "Process Failed", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.process_failed), Toast.LENGTH_LONG).show();
         }).addOnProgressListener(snapshot -> {
             //Calculate and show the percentage progress to the user
             double progressPercent = (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
@@ -245,13 +245,13 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         String description = descriptionText.getText().toString();
         //If the user has not given a description, show them an error message and return from the method
         if (description.trim().matches("")) {
-            Toast.makeText(this, "Please provide a description of the situation.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.provide_description), Toast.LENGTH_LONG).show();
             return;
         }
         //If the user has not permitted the usage of the GPS to our app,
         //show them the corresponding message and ask for the permission again with the useGPS() method, then return
         if (latitude == 0 || longitude == 0) {
-            Toast.makeText(this, "Please enable GPS to retrieve your location.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.enable_gps_to), Toast.LENGTH_LONG).show();
             useGPS();
             return;
         }
@@ -265,7 +265,7 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
         //The table that the data will ba stored is different for each category
         dangerousSituationsTables.child(categoryTable + "_dangerous_situations").push().setValue(currentDangerousSituation);
         //Show a success message to the user
-        showMessage("Success", "The Dangerous Situation Request has been uploaded.");
+        showMessage(getString(R.string.success), getString(R.string.request_uploaded));
         //Clear the image and the description views, so the user does not submit the same Request again by accident
         imageToUploadView.setImageURI(Uri.parse(""));
         descriptionText.setText("");

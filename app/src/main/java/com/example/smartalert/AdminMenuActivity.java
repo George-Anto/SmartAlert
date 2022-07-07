@@ -123,10 +123,10 @@ public class AdminMenuActivity extends AppCompatActivity {
         StringBuilder builder = new StringBuilder();
         //For each group, store its data to the StringBuilder we created
         builder.append(group.getCategory()).append("\n");
-        builder.append("Alert: ").append(group.getAlertLevel()).append("\n");
-        builder.append("Times Reported: ").append(group.getNumberOfTimesReported()).append("\n");
-        builder.append("Date: ").append(group.getDate()).append("\n");
-        builder.append("Time: ").append(group.getTime()).append("\n");
+        builder.append(getString(R.string.alert)).append(group.getAlertLevel()).append("\n");
+        builder.append(getString(R.string.times_reported)).append(group.getNumberOfTimesReported()).append("\n");
+        builder.append(getString(R.string.date)).append(group.getDate()).append("\n");
+        builder.append(getString(R.string.time)).append(group.getTime()).append("\n");
         //Call the method that sets the location of the group
         setLocation(group, builder);
 
@@ -148,12 +148,12 @@ public class AdminMenuActivity extends AppCompatActivity {
     //If not, the latitude and longitude will be added to the ui
     private void setLocation(DangerousSituationsGroup group, StringBuilder builder) {
         if (group.getLocationAddress().matches("Unknown address")) {
-            builder.append("Location\n");
-            builder.append("Latitude: ").append(group.getLatitude()).append("\n");
-            builder.append("Longitude: ").append(group.getLongitude()).append("\n");
+            builder.append(getString(R.string.location));
+            builder.append(getString(R.string.latitude)).append(group.getLatitude()).append("\n");
+            builder.append(getString(R.string.longitude)).append(group.getLongitude()).append("\n");
             return;
         }
-        builder.append("Location Address: ").append(group.getLocationAddress()).append("\n");
+        builder.append(getString(R.string.location_address)).append(group.getLocationAddress()).append("\n");
     }
 
     //If the flag is true, the view is added to the ui, if not the view is removed
@@ -232,8 +232,8 @@ public class AdminMenuActivity extends AppCompatActivity {
         });
         //If no user found near that location, show a corresponding message
         if (usersToAlertPhoneNumbers.size() == 0) {
-            showMessage("No Users to be Alerted",
-                    "There are no known users near this Dangerous Situation.");
+            showMessage(getString(R.string.no_users),
+                    getString(R.string.there_are_no_users));
             return;
         }
         //If the user (admin) has given permission to our application to end SMSs
@@ -258,7 +258,7 @@ public class AdminMenuActivity extends AppCompatActivity {
             sendSMS(usersToAlertPhoneNumbers);
         } else {
             //When permission is denied
-            showMessage("Permission Denied", "This application is not permitted to send SMSs.");
+            showMessage(getString(R.string.permission_denied), getString(R.string.permission_denied_sms));
         }
     }
 
@@ -267,11 +267,11 @@ public class AdminMenuActivity extends AppCompatActivity {
         StringBuilder builder = new StringBuilder();
         //For each SMS group, store its data to the StringBuilder we created
         builder.append(dangerousSituationsGroupToAlertAbout.getCategory()).append("\n");
-        builder.append("Date: ").append(dangerousSituationsGroupToAlertAbout.getDate()).append("\n");
-        builder.append("Time: ").append(dangerousSituationsGroupToAlertAbout.getTime()).append("\n");
+        builder.append(getString(R.string.date)).append(dangerousSituationsGroupToAlertAbout.getDate()).append("\n");
+        builder.append(getString(R.string.time)).append(dangerousSituationsGroupToAlertAbout.getTime()).append("\n");
         //Call the method that sets the location
         setLocation(dangerousSituationsGroupToAlertAbout, builder);
-        builder.append("Advice from the civil protection: ")
+        builder.append(getString(R.string.advice))
                 .append(dangerousSituationsGroupToAlertAbout.generalInfo()).append("\n");
         //For debugging purposes
         System.out.println("-------------------");
@@ -284,6 +284,6 @@ public class AdminMenuActivity extends AppCompatActivity {
         phoneNumbers.forEach(phoneNumber -> smsManager.sendTextMessage(phoneNumber, null,
                 builder.toString(), null, null));
         //Show a success message
-        showMessage("Alert Sent", "An alert SMS has been sent to nearby users.");
+        showMessage(getString(R.string.alert_sent), getString(R.string.alert_sms_sent));
     }
 }

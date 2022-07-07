@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SmartAlert</string>
+    <string name="app_name">IntelligenterAlarm</string>
     <string name="your_email_auth">Your Email</string>
     <string name="your_password_auth">Your Password</string>
     <string name="login_auth">Login</string>

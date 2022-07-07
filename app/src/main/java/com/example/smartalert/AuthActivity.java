@@ -77,9 +77,9 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
                         } else {
                             try {
                                 //Show the error message so the user can understand what went wrong
-                                showMessage("Login Error", Objects.requireNonNull(task.getException()).getLocalizedMessage());
+                                showMessage(getString(R.string.login_error_auth), Objects.requireNonNull(task.getException()).getLocalizedMessage());
                             } catch (Exception e) {
-                                showMessage("Error", "Unknown Error, please try again!");
+                                showMessage(getString(R.string.error_auth), getString(R.string.unknown_error_auth));
                             }
                         }
                     });
@@ -112,9 +112,9 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
                 } else {
                     try {
                         //Show the error message so the user can understand what went wrong
-                        showMessage("Sign Up Error", Objects.requireNonNull(task.getException()).getLocalizedMessage());
+                        showMessage(getString(R.string.signup_error_auth), Objects.requireNonNull(task.getException()).getLocalizedMessage());
                     } catch (Exception e) {
-                        showMessage("Error", "Unknown Error, please try again!");
+                        showMessage(getString(R.string.error_auth), getString(R.string.unknown_error_auth));
                     }
                 }
             });
@@ -124,13 +124,13 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
     //Show empty email or password field helper method
     private void errorToast(String email, String password) {
         if (email.matches("") && password.matches(""))
-            Toast.makeText(this, "Please provide your Email and Password.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.email_password_error), Toast.LENGTH_LONG).show();
         else if (email.matches(""))
-            Toast.makeText(this, "Please provide your Email as well.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.email_error), Toast.LENGTH_LONG).show();
         else if (password.matches(""))
-            Toast.makeText(this, "Please provide your Password as well.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.password_error), Toast.LENGTH_LONG).show();
         else
-            Toast.makeText(this, "Unknown Error\nPlease try again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.unknown_error_auth), Toast.LENGTH_LONG).show();
     }
 
     //Show message helper method
@@ -205,7 +205,7 @@ public class AuthActivity extends AppCompatActivity implements LocationListener 
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
         } else {
             //When permission is denied
-            showMessage("Location Permission Denied", "Grand permission to Sign Up.");
+            showMessage(getString(R.string.location_permission_denied), getString(R.string.grand_permission));
             useGPS();
         }
     }
