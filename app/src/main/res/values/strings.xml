@@ -43,7 +43,7 @@
     <string name="earthquake_alert">There is an earthquake in progress, evacuate the buildings and go to an open area.</string>
     <string name="tornado_alert">There is a tornado near you, get to a protected indoors location for your safety.</string>
     <string name="other_alert">A dangerous situation is in progress near your location, be cautious.</string>
-    <string name="alert">"Alert: "</string>
+    <string name="alert">Alert: </string>
     <string name="times_reported">Times Reported: </string>
     <string name="date">Date: </string>
     <string name="time">Time: </string>
