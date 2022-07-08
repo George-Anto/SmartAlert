@@ -60,8 +60,6 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
 
     private EditText descriptionText;
 
-    //The categories table that will be used to show the user their options
-    private String[] pathsToShow;
     //The categories that will be saved in the database
     private static final String[] paths = {"Forest Fire", "City Fire", "Flood",
             "Earthquake", "Tornado", "Other"};
@@ -77,7 +75,8 @@ public class CreateDangerousSituationActivity extends AppCompatActivity implemen
 
         //Initialize the categories table that are available and will be shown to the user
         //parameterized to their language, provided the language is supported by our application
-        pathsToShow = new String[]{getString(R.string.forest_fire), getString(R.string.city_fire), getString(R.string.flood),
+        //The categories table that will be used to show the user their options
+        String[] pathsToShow = new String[]{getString(R.string.forest_fire), getString(R.string.city_fire), getString(R.string.flood),
                 getString(R.string.earthquake), getString(R.string.tornado), getString(R.string.other)};
 
         uid = getIntent().getStringExtra("Uid");
