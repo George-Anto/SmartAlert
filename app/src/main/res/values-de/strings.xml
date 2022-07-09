@@ -74,4 +74,7 @@
     <string name="earthquakes_alerts">Erdbeben insgesamt Warnungen: </string>
     <string name="tornadoes_alerts">Tornados Gesamtwarnungen: </string>
     <string name="others_alerts">Andere Situationen Warnungen insgesamt: </string>
+    <string name="admin_main_menu">Admin-Hauptmenü</string>
+    <string name="check_dangerous_situations">Überprüfen Sie gefährliche Situationen</string>
+    <string name="view_statistics">Statistiken anzeigen</string>
 </resources>

@@ -74,4 +74,7 @@
     <string name="earthquakes_alerts">Terremotos Total Alertas: </string>
     <string name="tornadoes_alerts">Alertas totales de tornados: </string>
     <string name="others_alerts">Otras Situaciones Total Alertas: </string>
+    <string name="admin_main_menu">Menú principal de administración</string>
+    <string name="check_dangerous_situations">Comprobar situaciones peligrosas</string>
+    <string name="view_statistics">Ver estadísticas</string>
 </resources>

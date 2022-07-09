@@ -73,4 +73,7 @@
     <string name="earthquakes_alerts">Earthquakes Total Alerts: </string>
     <string name="tornadoes_alerts">Tornadoes Total Alerts: </string>
     <string name="others_alerts">Other Situations Total Alerts: </string>
+    <string name="admin_main_menu">Admin Main Menu</string>
+    <string name="check_dangerous_situations">Check Dangerous Situations</string>
+    <string name="view_statistics">View Statistics</string>
 </resources>
