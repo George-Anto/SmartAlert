@@ -46,6 +46,8 @@ public class AdminMenuActivity extends AppCompatActivity {
     private DatabaseReference usersTable;
     //Instance that will hold the current dangerous situation group in order to extract info to send the users
     private DangerousSituationsGroup dangerousSituationsGroupToAlertAbout;
+    //The statistics table reference
+    DatabaseReference statisticsTableRef;
 
     @SuppressLint("InflateParams")
     @Override
@@ -66,6 +68,8 @@ public class AdminMenuActivity extends AppCompatActivity {
         DatabaseReference earthquakesGroupsTable = database.getReference("earthquakes_groups");
         DatabaseReference tornadosGroupsTable = database.getReference("tornados_groups");
         DatabaseReference othersGroupsTable = database.getReference("other_groups");
+        //Initialize the statistics table reference
+        statisticsTableRef = database.getReference("statistics");
 
         //Initialize users table reference and call the method that retrives all the users
         usersTable = database.getReference("users");
@@ -123,10 +127,10 @@ public class AdminMenuActivity extends AppCompatActivity {
         StringBuilder builder = new StringBuilder();
         //For each group, store its data to the StringBuilder we created
         builder.append(group.getCategory()).append("\n");
-        builder.append(getString(R.string.alert)).append(group.getAlertLevel()).append("\n");
-        builder.append(getString(R.string.times_reported)).append(group.getNumberOfTimesReported()).append("\n");
-        builder.append(getString(R.string.date)).append(group.getDate()).append("\n");
-        builder.append(getString(R.string.time)).append(group.getTime()).append("\n");
+        builder.append(getString(R.string.alert)).append(" ").append(group.getAlertLevel()).append("\n");
+        builder.append(getString(R.string.times_reported)).append(" ").append(group.getNumberOfTimesReported()).append("\n");
+        builder.append(getString(R.string.date)).append(" ").append(group.getDate()).append("\n");
+        builder.append(getString(R.string.time)).append(" ").append(group.getTime()).append("\n");
         //Call the method that sets the location of the group
         setLocation(group, builder);
 
@@ -138,6 +142,8 @@ public class AdminMenuActivity extends AppCompatActivity {
         sendAlertButton.setOnClickListener(v -> {
             //Call the method that alerts the users
             alertUsers(group);
+            //Call the method that updates the statistics table in the database
+            updateStatisticsTable(group);
 //            layout.removeView(view);
         });
         //Insert the view to the layout container of the ui
@@ -149,11 +155,11 @@ public class AdminMenuActivity extends AppCompatActivity {
     private void setLocation(DangerousSituationsGroup group, StringBuilder builder) {
         if (group.getLocationAddress().matches("Unknown address")) {
             builder.append(getString(R.string.location));
-            builder.append(getString(R.string.latitude)).append(group.getLatitude()).append("\n");
-            builder.append(getString(R.string.longitude)).append(group.getLongitude()).append("\n");
+            builder.append(getString(R.string.latitude)).append(" ").append(group.getLatitude()).append("\n");
+            builder.append(getString(R.string.longitude)).append(" ").append(group.getLongitude()).append("\n");
             return;
         }
-        builder.append(getString(R.string.location_address)).append(group.getLocationAddress()).append("\n");
+        builder.append(getString(R.string.location_address)).append(" ").append(group.getLocationAddress()).append("\n");
     }
 
     //If the flag is true, the view is added to the ui, if not the view is removed
@@ -271,7 +277,7 @@ public class AdminMenuActivity extends AppCompatActivity {
         builder.append(getString(R.string.time)).append(dangerousSituationsGroupToAlertAbout.getTime()).append("\n");
         //Call the method that sets the location
         setLocation(dangerousSituationsGroupToAlertAbout, builder);
-        builder.append(getString(R.string.advice))
+        builder.append(getString(R.string.advice)).append(" ")
                 .append(dangerousSituationsGroupToAlertAbout.generalInfo()).append("\n");
         //For debugging purposes
         System.out.println("-------------------");
@@ -285,5 +291,10 @@ public class AdminMenuActivity extends AppCompatActivity {
                 builder.toString(), null, null));
         //Show a success message
         showMessage(getString(R.string.alert_sent), getString(R.string.alert_sms_sent));
+    }
+
+    //Method that updates the statistics table in the database
+    private void updateStatisticsTable(DangerousSituationsGroup group) {
+        statisticsTableRef.push().setValue(group.getCategory());
     }
 }

@@ -76,6 +76,9 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
                 children.forEach(child -> {
                     userUpdateRef = child.getKey();
                     currentUser = child.getValue(User.class);
+                    System.out.println("----------------------------");
+                    System.out.println(currentUser);
+                    System.out.println("----------------------------");
                 });
                 //If the user has not sent their phone number yet, the variable will be 0
                 //and if this is the case, no value will be presented to the user
@@ -177,6 +180,10 @@ public class UserMenuActivity extends AppCompatActivity implements LocationListe
         updateUsersLocationInfo();
         //After we retrieve the user's location once, we stop getting any more location data from the user
         manager.removeUpdates(this);
+    }
+
+    public void onViewStatistics(View view) {
+        startActivity(new Intent(this, StatisticsActivity.class));
     }
 
     private void updateUsersLocationInfo() {

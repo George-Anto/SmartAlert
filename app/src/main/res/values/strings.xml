@@ -64,4 +64,13 @@
     <string name="send_alert_button">Send Alert</string>
     <string name="test_text">text</string>
     <string name="no_dangerous_situations_are_reported_yet">No dangerous situations are reported yet.</string>
+    <string name="statistics_available">Statistics Available</string>
+    <string name="you_can_see_here">You can see here how many alerts have been triggered for each Dangerous Situation Category.</string>
+    <string name="loading">Loading…</string>
+    <string name="forest_fires_alerts">Forest Fires Total Alerts: </string>
+    <string name="city_fires_alerts">City Fires Total Alerts: </string>
+    <string name="floods_alerts">Floods Total Alerts: </string>
+    <string name="earthquakes_alerts">Earthquakes Total Alerts: </string>
+    <string name="tornadoes_alerts">Tornadoes Total Alerts: </string>
+    <string name="others_alerts">Other Situations Total Alerts: </string>
 </resources>

@@ -65,4 +65,13 @@
     <string name="send_alert_button">Benachrichtigung senden</string>
     <string name="test_text">text</string>
     <string name="no_dangerous_situations_are_reported_yet">Es wurden noch keine gefährlichen Situationen gemeldet.</string>
+    <string name="statistics_available">Statistiken verfügbar</string>
+    <string name="you_can_see_here">Hier können Sie sehen, wie viele Warnungen für jede Gefahrensituationskategorie ausgelöst wurden.</string>
+    <string name="loading">Wird geladen…</string>
+    <string name="forest_fires_alerts">Gesamtzahl der Warnungen vor Waldbränden: </string>
+    <string name="city_fires_alerts">Warnungen vor Stadtbränden insgesamt: </string>
+    <string name="floods_alerts">Überschwemmungen insgesamt Warnungen: </string>
+    <string name="earthquakes_alerts">Erdbeben insgesamt Warnungen: </string>
+    <string name="tornadoes_alerts">Tornados Gesamtwarnungen: </string>
+    <string name="others_alerts">Andere Situationen Warnungen insgesamt: </string>
 </resources>
