@@ -1,7 +1,7 @@
 # SmartAlert
 
 ## Android App με Backend Module
-### Link για `[Backend](https://github.com/George-Anto/smart_alert_backend_public)`
+### Link για [Backend](https://github.com/George-Anto/smart_alert_backend_public)
 
 Η εφαρμογή έχει τον ρόλο της ειδοποίησης χρηστών που την έχουν εγκαταστήσει για επικίνδυνες - έκτακτες καταστάσεις (φωτιές πλημμύρες, σεισμούς) κοντά σε αυτούς. 
 Ο χρήστης έχει την δυνατότητα και να ειδοποιήσει για ένα επικίνδυνο περιστατικό αλλά και να ειδοποιηθεί. <br/>
